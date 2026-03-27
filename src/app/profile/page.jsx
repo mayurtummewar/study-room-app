@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import CalendarHeatmap from "../../components/CalendarHeatmap";
 import { rooms as mockRooms } from "../../lib/mockData";
 
@@ -18,25 +19,43 @@ export default function ProfilePage() {
   const [roomsVisited, setRoomsVisited] = useState([]);
   const [studyData, setStudyData] = useState({});
   const [showLogoutToast, setShowLogoutToast] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     // Try to read some real-ish state from localStorage if present
     const storedUser = typeof window !== 'undefined' && localStorage.getItem('username');
     if (storedUser) setUsername(storedUser);
 
-    const storedRooms = typeof window !== 'undefined' && localStorage.getItem('roomsVisited');
-    if (storedRooms) {
-      try { setRoomsVisited(JSON.parse(storedRooms)); } catch (e) { /* ignore */ }
-    } else {
-      // fallback sample: pick a few mock rooms
-      setRoomsVisited(mockRooms.slice(0,3).map(r => ({ id: r.id, name: r.name }))); 
-    }
+    // read per-user roomsVisited and studyDays keyed by username
+    if (storedUser) {
+      const keyRooms = `roomsVisited:${storedUser}`;
+      const storedRooms = localStorage.getItem(keyRooms);
+      if (storedRooms) {
+        try { setRoomsVisited(JSON.parse(storedRooms)); } catch (e) { /* ignore */ }
+      } else {
+        setRoomsVisited(mockRooms.slice(0,3).map(r => ({ id: r.id, name: r.name }))); 
+      }
 
-    const storedStudy = typeof window !== 'undefined' && localStorage.getItem('studyDays');
-    if (storedStudy) {
-      try { setStudyData(JSON.parse(storedStudy)); } catch (e) { /* ignore */ }
-    } else {
+      const keyStudy = `studyDays:${storedUser}`;
+      const storedStudy = localStorage.getItem(keyStudy);
+      if (storedStudy) {
+        try { setStudyData(JSON.parse(storedStudy)); } catch (e) { /* ignore */ }
+      } else {
       // Generate sample random activity for the last ~120 days
+      const data = {};
+      const today = new Date();
+      for (let i = 0; i < 120; i++) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const iso = d.toISOString().slice(0,10);
+        const r = Math.random();
+        if (r > 0.7) data[iso] = Math.ceil(r * 4);
+      }
+      setStudyData(data);
+      }
+    } else {
+      // no user signed in — show fallback sample rooms and generated study data
+      setRoomsVisited(mockRooms.slice(0,3).map(r => ({ id: r.id, name: r.name })));
       const data = {};
       const today = new Date();
       for (let i = 0; i < 120; i++) {
@@ -67,17 +86,19 @@ export default function ProfilePage() {
           <div>
             <button
               onClick={() => {
-                // clear local state and localStorage
+                // clear session username but preserve per-user stored data
                 if (typeof window !== 'undefined') {
                   localStorage.removeItem('username');
-                  localStorage.removeItem('roomsVisited');
-                  localStorage.removeItem('studyDays');
                 }
                 setUsername('');
                 setRoomsVisited([]);
                 setStudyData({});
                 setShowLogoutToast(true);
-                setTimeout(() => setShowLogoutToast(false), 2200);
+                setTimeout(() => {
+                  setShowLogoutToast(false);
+                  // redirect to login page
+                  router.push('/');
+                }, 2200);
               }}
               className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
             >

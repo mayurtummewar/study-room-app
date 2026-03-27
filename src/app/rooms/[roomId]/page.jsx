@@ -36,6 +36,22 @@ export default function RoomPage() {
     const handleConnect = () => {
       setConnected(true);
       socket.emit("room:join", { roomId, userName });
+
+      // persist this visit per-user
+      try {
+        if (typeof window !== 'undefined' && userName) {
+          const key = `roomsVisited:${userName}`;
+          const raw = localStorage.getItem(key);
+          const arr = raw ? JSON.parse(raw) : [];
+          const exists = arr.find((it) => it.id === roomId);
+          if (!exists) {
+            arr.push({ id: roomId, name: room ? room.title : roomId });
+            localStorage.setItem(key, JSON.stringify(arr));
+          }
+        }
+      } catch (e) {
+        // ignore storage errors
+      }
     };
 
     const handleDisconnect = () => setConnected(false);
@@ -60,6 +76,19 @@ export default function RoomPage() {
 
     const handleSessionComplete = () => {
       setStreak((prev) => prev + 1);
+      // increment today's study count in per-user studyDays
+      try {
+        if (typeof window !== 'undefined' && userName) {
+          const key = `studyDays:${userName}`;
+          const raw = localStorage.getItem(key);
+          const obj = raw ? JSON.parse(raw) : {};
+          const today = new Date().toISOString().slice(0,10);
+          obj[today] = (obj[today] || 0) + 1;
+          localStorage.setItem(key, JSON.stringify(obj));
+        }
+      } catch (e) {
+        // ignore
+      }
     };
 
     const handleUsersUpdate = (usersList) => {

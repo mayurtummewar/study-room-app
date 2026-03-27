@@ -27,10 +27,11 @@ export default function Login() {
 
 		// successful login: set current user
 		localStorage.setItem('username', username);
-		// ensure roomsVisited exists for user session
-		if (!localStorage.getItem('roomsVisited')) {
-			localStorage.setItem('roomsVisited', JSON.stringify([]));
-		}
+		// ensure per-user roomsVisited and studyDays exist
+		const keyRooms = `roomsVisited:${username}`;
+		const keyStudy = `studyDays:${username}`;
+		if (!localStorage.getItem(keyRooms)) localStorage.setItem(keyRooms, JSON.stringify([]));
+		if (!localStorage.getItem(keyStudy)) localStorage.setItem(keyStudy, JSON.stringify({}));
 		router.push('/home');
 	}
 

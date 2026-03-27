@@ -24,15 +24,17 @@ export default function Signup() {
       return;
     }
 
-    // store new user (we keep password as plain text for the demo)
-    const newUser = { username: name, password, email };
-    users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-    // set current session username
-    localStorage.setItem('username', name);
-    // initialize roomsVisited and studyDays for this user if not present
-    if (!localStorage.getItem('roomsVisited')) localStorage.setItem('roomsVisited', JSON.stringify([]));
-    if (!localStorage.getItem('studyDays')) localStorage.setItem('studyDays', JSON.stringify({}));
+  // store new user (we keep password as plain text for the demo)
+  const newUser = { username: name, password, email };
+  users.push(newUser);
+  localStorage.setItem('users', JSON.stringify(users));
+  // set current session username
+  localStorage.setItem('username', name);
+  // initialize per-user roomsVisited and studyDays for this user if not present
+  const keyRooms = `roomsVisited:${name}`;
+  const keyStudy = `studyDays:${name}`;
+  if (!localStorage.getItem(keyRooms)) localStorage.setItem(keyRooms, JSON.stringify([]));
+  if (!localStorage.getItem(keyStudy)) localStorage.setItem(keyStudy, JSON.stringify({}));
 
     router.push('/home');
   }
