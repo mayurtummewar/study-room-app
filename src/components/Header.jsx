@@ -13,12 +13,12 @@ export default function Header() {
       const u = localStorage.getItem("username");
       if (u) setUsername(u);
     }
-  }, []);
+  }, [pathname]);
 
   return (
     <header className="w-full bg-white/80 backdrop-blur-sm border-b">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-  <Link href="/home" className="flex items-center gap-3">
+        <Link href="/home" className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold">S</div>
           <div>
             <div className="text-lg font-semibold">SyncStudy</div>
@@ -33,7 +33,7 @@ export default function Header() {
               Home
             </Link>
             <Link href="/profile" className="text-sm text-gray-700 hover:underline flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm">{username ? username.slice(0,1).toUpperCase() : 'G'}</span>
+              <span className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm">{username ? username.slice(0, 1).toUpperCase() : 'G'}</span>
               <span>{username || 'Guest'}</span>
             </Link>
           </nav>
