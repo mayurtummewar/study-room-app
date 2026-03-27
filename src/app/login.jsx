@@ -47,6 +47,16 @@ export default function Login() {
 					>
 						Login
 					</button>
+
+					<div className="mt-2">
+						<button
+							type="button"
+							onClick={() => router.push("/signup")}
+							className="w-full bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300"
+						>
+							Signup
+						</button>
+					</div>
 				</form>
 			</div>
 		</div>
