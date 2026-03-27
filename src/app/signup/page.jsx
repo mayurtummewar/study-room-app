@@ -8,11 +8,33 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
 
   function handleSignup(e) {
     e.preventDefault();
-    // No real auth - route to home directly as requested
-    router.push("/home");
+    setError("");
+    if (typeof window === 'undefined') return;
+    const raw = localStorage.getItem('users');
+    const users = raw ? JSON.parse(raw) : [];
+
+    // check for existing username
+    if (users.find(u => u.username === name)) {
+      setError('Username already exists. Please choose another.');
+      return;
+    }
+
+    // store new user (we keep password as plain text for the demo)
+    const newUser = { username: name, password, email };
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
+    // set current session username
+    localStorage.setItem('username', name);
+    // initialize roomsVisited and studyDays for this user if not present
+    if (!localStorage.getItem('roomsVisited')) localStorage.setItem('roomsVisited', JSON.stringify([]));
+    if (!localStorage.getItem('studyDays')) localStorage.setItem('studyDays', JSON.stringify({}));
+
+    router.push('/home');
   }
 
   return (
@@ -60,6 +82,7 @@ export default function Signup() {
             Signup
           </button>
         </form>
+        {error && <div className="text-sm text-red-600 mt-3">{error}</div>}
       </div>
     </div>
   );

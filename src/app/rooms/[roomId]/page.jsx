@@ -19,7 +19,13 @@ export default function RoomPage() {
   const [activeTab, setActiveTab] = useState("chat");
   const [messages, setMessages] = useState([]);
   const [connected, setConnected] = useState(false);
-  const [userName] = useState(() => `Guest-${Math.floor(Math.random() * 1000)}`);
+  const [userName] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('username');
+      if (stored) return stored;
+    }
+    return `Guest-${Math.floor(Math.random() * 1000)}`;
+  });
   const [users, setUsers] = useState([]);
 
   const room = rooms.find((r) => r.id === roomId);

@@ -7,11 +7,31 @@ export default function Login() {
 	const router = useRouter();
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
+	const [error, setError] = useState("");
 
 	function handleSubmit(e) {
 		e.preventDefault();
-		// For now we don't validate; navigate to the main app page.
-		router.push("/home");
+		setError("");
+		if (typeof window === 'undefined') return;
+		const raw = localStorage.getItem('users');
+		const users = raw ? JSON.parse(raw) : [];
+		const user = users.find(u => u.username === username);
+		if (!user) {
+			setError('User not found. Please sign up first.');
+			return;
+		}
+		if (user.password !== password) {
+			setError('Incorrect password');
+			return;
+		}
+
+		// successful login: set current user
+		localStorage.setItem('username', username);
+		// ensure roomsVisited exists for user session
+		if (!localStorage.getItem('roomsVisited')) {
+			localStorage.setItem('roomsVisited', JSON.stringify([]));
+		}
+		router.push('/home');
 	}
 
 	return (
@@ -57,6 +77,10 @@ export default function Login() {
 							Signup
 						</button>
 					</div>
+
+					{error && (
+						<div className="text-sm text-red-600 mt-2" role="alert">{error}</div>
+					)}
 				</form>
 			</div>
 		</div>
